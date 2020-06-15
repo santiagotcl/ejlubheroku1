@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>prueba flask</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+        <p>{{message}}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+  
+
+    <h1>ARTICULOS VENDIDOS</h1>
+
+
+
+        
+
+
+
+
+    <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Articulo</th>
+                <th scope="col">Codigo</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Fecha</th>
+            </tr>
+            </thead>
+        <tbody>
+
+            {% for contacto in contactos %}
+                <tr>
+                    <td>{{contacto.1}}</td>
+                    <td>{{contacto.2}}</td>
+                    <td>{{contacto.3}}</td>
+                    <td>{{contacto.4}}</td>
+                    <td>{{contacto.5}}</td>
+                    <td>{{contacto.6}}</td>
+                    <td>
+                        <a href="/devolver/{{contacto.0}}"><button type="button" class="btn btn-danger" >Disolver Venta</button></a>
+                    </td> 
+                </tr>
+            {%endfor%}
+            
+
+         
+            
+        </tbody>
+    </table>
+
+
+
+    <a href="/"><button type="button" class="btn btn-primary" >Volver!</button></a>
+        
+   
+
+
+
+</body>
+</html>

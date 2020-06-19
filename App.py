@@ -5,10 +5,10 @@ from datetime import datetime
 app=Flask(__name__)
 
 #MYSQL conexion
-app.config["MYSQL_HOST"] = "localhost"
-app.config["MYSQL_USER"] = "root"
-app.config["MYSQL_PASSWORD"] = "password"
-app.config["MYSQL_DB"] = "bbddlub" #le pido que se conecte a la base de datos prueba flask
+app.config["MYSQL_HOST"] = "ec2-52-0-155-79.compute-1.amazonaws.com"
+app.config["MYSQL_USER"] = "ncyjgbhzitpxga"
+app.config["MYSQL_PASSWORD"] = "e4445c6c6f54c86450623503f7a296a89c63d0ae0d9f089a06e536ddea46d399"
+app.config["MYSQL_DB"] = "d9k8p4r9hnurg7" #le pido que se conecte a la base de datos prueba flask
 #cuando pongo el puerto no anda
 mysql = MySQL(app)
 

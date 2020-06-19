@@ -1,14 +1,12 @@
 from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_mysqldb import MySQL
 from datetime import datetime
+import psycopg2
 
 app=Flask(__name__)
 
 #MYSQL conexion
-app.config["MYSQL_HOST"] = "ec2-52-0-155-79.compute-1.amazonaws.com"
-app.config["MYSQL_USER"] = "ncyjgbhzitpxga"
-app.config["MYSQL_PASSWORD"] = "e4445c6c6f54c86450623503f7a296a89c63d0ae0d9f089a06e536ddea46d399"
-app.config["MYSQL_DB"] = "d9k8p4r9hnurg7" #le pido que se conecte a la base de datos prueba flask
+conn = psycopg2.connect(dbname="d9k8p4r9hnurg7", user="ncyjgbhzitpxga", password="e4445c6c6f54c86450623503f7a296a89c63d0ae0d9f089a06e536ddea46d399", host="ec2-52-0-155-79.compute-1.amazonaws.com", port="5432")
 #cuando pongo el puerto no anda
 mysql = MySQL(app)
 
@@ -38,7 +36,7 @@ def buscar():
 @app.route("/buscarn", methods=["POST"])
 def busc():
     nombre = request.form["nombre"]
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM PRODUCTOS WHERE PRODUCTO LIKE '"+nombre+" %' OR PRODUCTO LIKE '% "+nombre+" %' OR PRODUCTO LIKE '% "+nombre+"' ")
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     if (len(data)==0):
@@ -52,7 +50,7 @@ def busc():
 def busccod():
     if request.method == "POST":
         codigo = request.form["codigo"]
-        cur = mysql.connection.cursor()
+        cur = conn.cursor()
         cur.execute("SELECT * FROM PRODUCTOS WHERE CODIGO like '" +codigo+ "'")
         data = cur.fetchall()
         return render_template("buscar.html", contactos=data)
@@ -63,7 +61,7 @@ def busccod():
 def vendido(stock,codigo):
     stock = stock - 1
     print(stock)
-    cur = mysql.connection.cursor() #me conecto con la BDD
+    cur = conn.cursor() #me conecto con la BDD
     cur.execute("""
                     UPDATE PRODUCTOS
                     SET CANTIDAD = %s
@@ -76,7 +74,7 @@ def vendido(stock,codigo):
 @app.route("/agregar/<string:codigo>")
 def agregar(codigo):
     global total
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM PRODUCTOS WHERE CODIGO like '" +codigo+ "'")
     data1 = cur.fetchall()
     temp=data1[0]
@@ -105,7 +103,7 @@ def venta():
         stock=sum[2]
         codigo=sum[1]
         stock = stock - int(sum[4])
-        cur = mysql.connection.cursor() #me conecto con la BDD
+        cur = conn.cursor() #me conecto con la BDD
         cur.execute("""
                      UPDATE PRODUCTOS
                      SET CANTIDAD = %s
@@ -128,7 +126,7 @@ def venta():
     while(i < k):
         temp=list(suma[i])
         temp1=float(temp[4])*float(temp[3])
-        cur = mysql.connection.cursor() #me conecto con la BDD
+        cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO ventas (PRODUCTO,CODIGO,CANTIDAD,PRECIO,HORA,FECHA) VALUES (%s, %s, %s,%s,%s,%s)", 
         (temp[0], temp[1], temp[4],temp1,hora,fecha)) #hago la consulta SQL
         mysql.connection.commit() #guardo los cambios
@@ -173,14 +171,14 @@ def aumentar(precio,i):
 @app.route("/ventas", methods=["POST"])
 def Ventas():
     if request.method == "POST":
-        cur = mysql.connection.cursor()
+        cur = conn.cursor()
         cur.execute("SELECT * FROM ventas")
         data = cur.fetchall()#resultado de la busqueda en la base de datos
         return render_template("ventas.html", contactos=data)
 
 @app.route("/devolver/<id>")#disulve ventas realizadas y vuelve a sumar stock en caso de error
 def devolver(id):
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM ventas WHERE ID = "+id+"")#saco cantidad y codigo del articulo
     data = cur.fetchall()
     data1=list(data[0])
@@ -221,7 +219,7 @@ def add_client():
         fecha = now.strftime('%d-%m-%Y')
         hora = now.strftime("%H:%M")
         print(int(telefono))
-        cur = mysql.connection.cursor() #me conecto con la BDD
+        cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO clientes (NOMBRE,APELLIDO,TELEFONO,PATENTE,HORA,FECHA,KILOMETROS,AUTO) VALUES (%s, %s, %s,%s, %s, %s,%s, %s)", 
         (nombre, apellido, int(telefono), patente, hora, fecha, kilometros, auto)) #hago la consulta SQL
         mysql.connection.commit() #guardo los cambios
@@ -233,7 +231,7 @@ def add_client():
 def buscln():
     nombre = request.form["nombre"]
     print(nombre)
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM CLIENTES WHERE NOMBRE = %s", (nombre,))
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     return render_template("clientes.html", contactos=data)
@@ -243,7 +241,7 @@ def buscln():
 def busclp():
     patente = request.form["codigo"]
     print(patente)
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM CLIENTES WHERE PATENTE = %s", (patente,))
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     return render_template("clientes.html", contactos=data)
@@ -251,7 +249,7 @@ def busclp():
 @app.route("/buscla", methods=["POST"])
 def buscla():
     auto = request.form["codigo"]
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM CLIENTES WHERE AUTO = %s", (auto,))
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     return render_template("clientes.html", contactos=data)
@@ -259,7 +257,7 @@ def buscla():
 
 @app.route("/elimclient/<string:id>")#recibo un parametro tipo string
 def elimclient(id):
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("DELETE FROM CLIENTES WHERE id = %s", (id,))
     mysql.connection.commit() #guardo los cambios
     flash("cliente eliminado satifactoriamente") #envia mesajes entre vistas
@@ -284,7 +282,7 @@ def a_stock():
 @app.route("/buscarns", methods=["POST"])
 def buscs():
     nombre = request.form["nombre"]
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM PRODUCTOS WHERE PRODUCTO LIKE '"+nombre+" %' OR PRODUCTO LIKE '% "+nombre+" %' OR PRODUCTO LIKE '% "+nombre+"' ")
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     return render_template("stock.html", contactos=data)
@@ -298,7 +296,7 @@ def buscs():
 def busccods():
     if request.method == "POST":
         codigo = request.form["codigo"]
-        cur = mysql.connection.cursor()
+        cur = conn.cursor()
         cur.execute("SELECT * FROM PRODUCTOS WHERE CODIGO like '" +codigo+ "'")
         data = cur.fetchall()
         return render_template("stock.html", contactos=data)
@@ -311,7 +309,7 @@ def busccods():
 @app.route("/masstock/<codigo>", methods=["POST"])
 def aumentars(codigo):
     aumstock = request.form["aumstock"]
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("SELECT * FROM PRODUCTOS WHERE CODIGO like '" +codigo+ "'")
     data = cur.fetchall()
     data=list(data[0])
@@ -338,7 +336,7 @@ def aumentars(codigo):
 @app.route("/camprecio/<codigo>", methods=["POST"])
 def camprecio(codigo):
     price = request.form["price"]
-    cur = mysql.connection.cursor()
+    cur = conn.cursor()
     cur.execute("""
                     UPDATE PRODUCTOS
                     SET PRECIO = %s
@@ -364,7 +362,7 @@ def add_producto():
         codigo = request.form["codigo"]
         cantidad = request.form["cantidad"]
         precio = request.form["precio"]
-        cur = mysql.connection.cursor() #me conecto con la BDD
+        cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO PRODUCTOS (PRODUCTO,CODIGO,CANTIDAD,PRECIO) VALUES (%s, %s, %s,%s)", 
         (producto, codigo, cantidad, precio)) #hago la consulta SQL
         mysql.connection.commit() #guardo los cambios

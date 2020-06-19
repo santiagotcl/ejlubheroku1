@@ -371,4 +371,4 @@ def add_producto():
 
     
 if __name__ == "__main__":
-    app.run(port = 3000, debug = True) #hacemos que se refresque solo
+    app.run(debug = True) #hacemos que se refresque solo

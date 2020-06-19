@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, url_for, redirect, flash
-from flask_mysqldb import MySQL
 from datetime import datetime
 import psycopg2
 
@@ -8,7 +7,6 @@ app=Flask(__name__)
 #MYSQL conexion
 conn = psycopg2.connect(dbname="d9k8p4r9hnurg7", user="ncyjgbhzitpxga", password="e4445c6c6f54c86450623503f7a296a89c63d0ae0d9f089a06e536ddea46d399", host="ec2-52-0-155-79.compute-1.amazonaws.com", port="5432")
 #cuando pongo el puerto no anda
-mysql = MySQL(app)
 
 #iniciamos sesion(guarda datos en una memoria para luego usarlos)
 app.secret_key="mysecretkey"
@@ -67,7 +65,7 @@ def vendido(stock,codigo):
                     SET CANTIDAD = %s
                     WHERE CODIGO=%s
         """,(stock,codigo)) #hago la consulta SQL
-    mysql.connection.commit() #guardo los cambios
+    conn.commit() #guardo los cambios
     return render_template("index.html")
 
 
@@ -109,7 +107,7 @@ def venta():
                      SET CANTIDAD = %s
                       WHERE CODIGO=%s
             """,(stock,codigo)) #hago la consulta SQL
-        mysql.connection.commit() #guardo los cambios
+        conn.commit() #guardo los cambios
     total=0
 
 
@@ -129,7 +127,7 @@ def venta():
         cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO ventas (PRODUCTO,CODIGO,CANTIDAD,PRECIO,HORA,FECHA) VALUES (%s, %s, %s,%s,%s,%s)", 
         (temp[0], temp[1], temp[4],temp1,hora,fecha)) #hago la consulta SQL
-        mysql.connection.commit() #guardo los cambios
+        conn.commit() #guardo los cambios
         i=i+1
 
 
@@ -193,7 +191,7 @@ def devolver(id):
             """,(stock,data1[2])) #hago la consulta SQL
 
     cur.execute("DELETE FROM ventas WHERE ID = "+id+"")
-    mysql.connection.commit() #guardo los cambios
+    conn.commit() #guardo los cambios
     cur.execute("SELECT * FROM ventas")
     data = cur.fetchall()#resultado de la busqueda en la base de datos
     flash("ARTICULO REINCORPORADO!!!")
@@ -222,7 +220,7 @@ def add_client():
         cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO clientes (NOMBRE,APELLIDO,TELEFONO,PATENTE,HORA,FECHA,KILOMETROS,AUTO) VALUES (%s, %s, %s,%s, %s, %s,%s, %s)", 
         (nombre, apellido, int(telefono), patente, hora, fecha, kilometros, auto)) #hago la consulta SQL
-        mysql.connection.commit() #guardo los cambios
+        conn.commit() #guardo los cambios
         flash("cliente agregado satifactoriamente") #envia mesajes entre vistas
         return redirect(url_for("index")) #hago que se vuelva a cargar index.html al agregar un contacto
 
@@ -259,7 +257,7 @@ def buscla():
 def elimclient(id):
     cur = conn.cursor()
     cur.execute("DELETE FROM CLIENTES WHERE id = %s", (id,))
-    mysql.connection.commit() #guardo los cambios
+    conn.commit() #guardo los cambios
     flash("cliente eliminado satifactoriamente") #envia mesajes entre vistas
     return redirect(url_for("index"))
 
@@ -319,7 +317,7 @@ def aumentars(codigo):
                     SET CANTIDAD = %s
                     WHERE CODIGO=%s
         """,(stock_nuevo, codigo,)) #hago la consulta SQL
-    mysql.connection.commit() #guardo los cambios
+    conn.commit() #guardo los cambios
     flash("STOCK MODIFICADO!!!!!!") #envia mesajes entre vistas
     return render_template("stock.html")
 
@@ -342,7 +340,7 @@ def camprecio(codigo):
                     SET PRECIO = %s
                     WHERE CODIGO=%s
         """,(float(price), codigo,)) #hago la consulta SQL
-    mysql.connection.commit() #guardo los cambios
+    conn.commit() #guardo los cambios
     flash("PRECIO MODIFICADO!!!!!!") #envia mesajes entre vistas
     return render_template("stock.html")
 
@@ -365,7 +363,7 @@ def add_producto():
         cur = conn.cursor() #me conecto con la BDD
         cur.execute("INSERT INTO PRODUCTOS (PRODUCTO,CODIGO,CANTIDAD,PRECIO) VALUES (%s, %s, %s,%s)", 
         (producto, codigo, cantidad, precio)) #hago la consulta SQL
-        mysql.connection.commit() #guardo los cambios
+        conn.commit() #guardo los cambios
         flash("Producto agregado satifactoriamente") #envia mesajes entre vistas
         return redirect(url_for("Aarticulo")) #hago que se vuelva a cargar index.html al agregar un contacto
 
